@@ -115,26 +115,39 @@ class YOLO_TF:
 		ip = tf.add(tf.matmul(inputs_processed,weight),biases)
 		return tf.maximum(self.alpha*ip,ip,name=str(idx)+'_fc')
 
-	def detect_from_cvmat(self,img):
-		s = time.time()
-		self.h_img,self.w_img,_ = img.shape
-		img_resized = cv2.resize(img, (448, 448))
-		img_RGB = cv2.cvtColor(img_resized,cv2.COLOR_BGR2RGB)
-		img_resized_np = np.asarray( img_RGB )
-		inputs = np.zeros((1,448,448,3),dtype='float32')
-		inputs[0] = (img_resized_np/255.0)*2.0-1.0
-		in_dict = {self.x: inputs}
-		net_output = self.sess.run(self.fc_32,feed_dict=in_dict)
-		self.result = self.interpret_output(net_output[0])
-		self.show_results(img,self.result)
-		strtime = str(time.time()-s)
-		if self.disp_console : print 'Elapsed time : ' + strtime + ' secs' + '\n'
+#Need to change the code below
 
-	def detect_from_file(self,filename):
-		if self.disp_console : print 'Detect from ' + filename
-		img = cv2.imread(filename)
-		#img = misc.imread(filename)
-		self.detect_from_cvmat(img)
+	 def detect_from_cvmat(self,img,out):
+        s = time.time()
+        self.h_img,self.w_img,_ = img.shape
+        img_resized = cv2.resize(img, (448, 448))
+        img_RGB = cv2.cvtColor(img_resized,cv2.COLOR_BGR2RGB)
+        img_resized_np = np.asarray( img_RGB )
+        inputs = np.zeros((1,448,448,3),dtype='float32')
+        inputs[0] = (img_resized_np/255.0)*2.0-1.0
+        in_dict = {self.x: inputs}
+        net_output = self.sess.run(self.fc_32,feed_dict=in_dict)
+        self.result = self.interpret_output(net_output[0])
+        self.show_results(img,out,self.result)
+        strtime = str(time.time()-s)
+        if self.disp_console : print 'Elapsed time : ' + strtime + ' secs' + '\n'
+
+    def detect_from_file(self,filename):
+        if self.disp_console : print 'Detect from ' + filename
+        # img = cv2.imread(filename)
+        cap = cv2.VideoCapture(filename)
+        width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+        out = cv2.VideoWriter(self.tofile_img,fourcc, 20.0, (int(width),int(height)))
+
+        while(cap.isOpened()):
+            ret, frame = cap.read()
+            print ret
+            self.detect_from_cvmat(frame,out)
+        cap.release()
+        out.release()
+        cv2.destroyAllWindows()
 
 	def detect_from_crop_sample(self):
 		self.w_img = 640
@@ -202,7 +215,7 @@ class YOLO_TF:
 
 		return result
 
-	def show_results(self,img,results):
+	def show_results(self,img,out,results):
 		img_cp = img.copy()
 		if self.filewrite_txt :
 			ftxt = open(self.tofile_txt,'w')
@@ -220,7 +233,7 @@ class YOLO_TF:
 				ftxt.write(results[i][0] + ',' + str(x) + ',' + str(y) + ',' + str(w) + ',' + str(h)+',' + str(results[i][5]) + '\n')
 		if self.filewrite_img : 
 			if self.disp_console : print '    image file writed : ' + self.tofile_img
-			cv2.imwrite(self.tofile_img,img_cp)			
+			out.imwrite(img_cp)			
 		if self.imshow :
 			cv2.imshow('YOLO_small detection',img_cp)
 			cv2.waitKey(1)
