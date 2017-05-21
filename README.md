@@ -1,7 +1,4 @@
-EL-GY 6123 - IMAGE AND VIDEO PROCESSING Spring 2017  
 Retail Store Usage Analysis  
-Abhishek Vasu av1912  
-Roshan Sridhar rs5788  
 
 This directory contains   
 1. python code 'YOLO_small_tf.py'  
