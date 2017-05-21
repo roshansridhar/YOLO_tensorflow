@@ -1,9 +1,9 @@
-
-
-
-
-
-# Modified the code 'YOLO_tensorflow' by Choi found here: https://github.com/gliese581gg/YOLO_tensorflow 
+# EL-GY 6123 - IMAGE AND VIDEO PROCESSING Spring 2017
+# Retail Store Usage Analysis
+# Abhishek Vasu av1912
+# Roshan Sridhar rs5788
+# Modified 'YOLO_tensorflow' by Choi. Original code found here: https://github.com/gliese581gg/YOLO_tensorflow 
+# View readme for instructions
 
 import numpy as np
 import tensorflow as tf
