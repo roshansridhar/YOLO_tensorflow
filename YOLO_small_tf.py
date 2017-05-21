@@ -1,8 +1,18 @@
+
+
+
+
+
+# Modified the code 'YOLO_tensorflow' by Choi found here: https://github.com/gliese581gg/YOLO_tensorflow 
+
 import numpy as np
 import tensorflow as tf
 import cv2
 import time
 import sys
+import seaborn as sns
+import scipy.ndimage as ndimage
+from sklearn.preprocessing import normalize
 
 class YOLO_TF:
 	fromfile = None
@@ -149,6 +159,8 @@ class YOLO_TF:
             			mat = self.detect_from_cvmat(frame,out,blah)
 			else:
 				break
+		mat_norm2 = normalize(mat).ravel()
+		self.generate_heatmap(mat_norm2)
 		cap.release()
 		out.release()
 		cv2.destroyAllWindows()
@@ -228,7 +240,7 @@ class YOLO_TF:
 			y = int(results[i][2])
 			w = int(results[i][3])//2
 			h = int(results[i][4])//2
-			blah[y,x] += 1
+			blah[y-h:y+h,x-w:x+w] += 1
 			if self.disp_console : print '    class : ' + results[i][0] + ' , [x,y,w,h]=[' + str(x) + ',' + str(y) + ',' + str(int(results[i][3])) + ',' + str(int(results[i][4]))+'], Confidence = ' + str(results[i][5])
 			if self.filewrite_img or self.imshow:
 				cv2.rectangle(img_cp,(x-w,y-h),(x+w,y+h),(0,255,0),2)
@@ -257,6 +269,11 @@ class YOLO_TF:
 	def training(self): #TODO add training function!
 		return None
 
+	def generate_heatmap(self,matrix): #insert numpy array 
+		matrix = ndimage.gaussian_filter(matrix, sigma=5, order=0)
+		plot = sns.heatmap(matrix, cmap="coolwarm")
+		hmap = plot.get_figure()
+		hmap.savefig("heatmap.png")
 	
 			
 def main(argvs):
